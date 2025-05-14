@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Search } from "lucide-react";
 import { useInvoice } from "@/contexts/InvoiceContext";
-import { fetchGSTDetails, validateGST } from "@/utils/gstUtils";
+import { fetchGSTDetails, validateGST, saveGSTDetailsToLocalStorage } from "@/utils/gstUtils";
 import { useToast } from "@/components/ui/use-toast";
 
 const CustomerForm = () => {
@@ -27,17 +26,24 @@ const CustomerForm = () => {
     try {
       const details = await fetchGSTDetails(customer.gstNumber);
       if (details) {
-        setCustomer(prev => ({
-          ...prev,
-          name: details.name || prev.name,
-          businessName: details.businessName || prev.businessName,
-          state: details.state || prev.state,
-          city: details.city || prev.city
-        }));
+        // Create a properly merged object with the new details
+        const updatedCustomer = {
+          ...customer,
+          name: details.name || customer.name,
+          businessName: details.businessName || customer.businessName,
+          state: details.state || customer.state,
+          city: details.city || customer.city
+        };
+        
+        // Update the customer state with the complete object
+        setCustomer(updatedCustomer);
+        
         toast({
           title: "GST Details Found",
-          description: "Customer details have been populated from GST database",
+          description: "Customer details have been automatically populated",
         });
+        
+        console.log("Updated customer details:", updatedCustomer);
       }
     } catch (error) {
       toast({
@@ -45,6 +51,7 @@ const CustomerForm = () => {
         description: "Failed to fetch GST details",
         variant: "destructive"
       });
+      console.error("GST fetch error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -56,6 +63,21 @@ const CustomerForm = () => {
       ...prev,
       [name]: value
     }));
+    
+    // If user changes a field and there's a GST number present, store the updated details
+    if (customer.gstNumber && validateGST(customer.gstNumber) && name !== "gstNumber") {
+      // Create data object with current customer details
+      const customerData = {
+        name: customer.name,
+        businessName: customer.businessName,
+        state: customer.state,
+        city: customer.city
+      };
+      
+      // Save to localStorage
+      saveGSTDetailsToLocalStorage(customer.gstNumber, customerData);
+      console.log("Saved updated customer GST details to localStorage");
+    }
   };
 
   return (

@@ -39,16 +39,17 @@ const InvoicePreview = () => {
             <style>
               @page {
                 size: A4;
-                margin: 5mm;
+                margin: 10mm;
               }
               body { 
                 font-family: Arial, sans-serif; 
                 margin: 0; 
                 padding: 5mm;
-                font-size: 12px; 
+                font-size: 14px; 
                 width: 100%;
-                max-width: 210mm;
+                max-width: 190mm; /* A4 width minus margins */
                 height: 100%;
+                box-sizing: border-box;
               }
               .invoice-paper { 
                 width: 100%;
@@ -56,6 +57,7 @@ const InvoicePreview = () => {
                 padding: 0;
                 page-break-inside: avoid;
                 break-inside: avoid;
+                box-sizing: border-box;
               }
               table { 
                 width: 100%; 
@@ -64,14 +66,14 @@ const InvoicePreview = () => {
                 margin-bottom: 10px;
               }
               th, td { 
-                padding: 4px 5px; 
+                padding: 5px; 
                 text-align: left; 
                 overflow-wrap: break-word;
-                font-size: 11px;
+                font-size: 14px;
               }
               th { 
                 border-bottom: 1px solid #ddd; 
-                font-size: 11px;
+                font-size: 14px;
                 font-weight: bold;
               }
               td { 
@@ -82,61 +84,114 @@ const InvoicePreview = () => {
               .font-bold { font-weight: bold; }
               .text-gray-600 { color: #666; }
               img { max-height: 60px; }
-              .product-table th:nth-child(1) { width: 25%; }
+              
+              /* Adjusted item columns width */
+              .product-table th:nth-child(1) { width: 40%; }
               .product-table th:nth-child(2) { width: 10%; }
               .product-table th:nth-child(3) { width: 8%; }
               .product-table th:nth-child(4) { width: 12%; }
               .product-table th:nth-child(5) { width: 10%; }
-              .product-table th:nth-child(6) { width: 10%; }
-              .product-table th:nth-child(7) { width: 15%; }
+              .product-table th:nth-child(6) { width: 8%; }
+              .product-table th:nth-child(7) { width: 12%; }
+              
+              .header-container {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-start;
+                width: 100%;
+                margin-bottom: 20px;
+              }
+              
+              .header-left {
+                display: flex;
+                align-items: flex-start;
+                gap: 15px;
+                width: 30%;
+              }
+              
+              .header-right {
+                width: 65%;
+                text-align: right;
+              }
+              
+              .invoice-title {
+                margin-top: 0;
+                margin-bottom: 6px;
+                font-weight: bold;
+                font-size: 22px;
+              }
+              
+              .business-name {
+                margin-top: 0;
+                margin-bottom: 6px;
+                font-weight: bold;
+                font-size: 18px;
+                line-height: 1.3;
+                padding-left: 0;
+                max-width: 100%;
+                word-wrap: break-word;
+              }
               
               .total-section {
                 width: 100%;
-                max-width: 300px;
+                max-width: 250px;
                 margin-left: auto;
+                margin-right: 0;
+                padding-right: 0;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
               }
+              
               .summary-row {
                 display: flex;
                 justify-content: space-between;
                 margin-bottom: 5px;
+                padding: 3px 0;
                 width: 100%;
+                box-sizing: border-box;
               }
+              
               .summary-label {
                 text-align: left;
-                font-size: 11px;
+                font-size: 14px;
+                flex: 1;
+                padding-right: 10px;
               }
+              
               .summary-value {
                 text-align: right;
-                min-width: 100px;
-                padding-left: 15px;
-                font-size: 11px;
+                min-width: 90px;
+                max-width: 100px;
+                font-size: 14px;
                 font-weight: bold;
               }
+              
               .footer-section {
-                margin-top: 10px;
+                margin-top: 15px;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
-                font-size: 11px;
+                font-size: 14px;
               }
+              
               @media print {
                 body { 
-                  -webkit-print-color-adjust: exact; 
+                  -webkit-print-color-adjust: exact;
                   width: 100%;
                   margin: 0;
                   padding: 5mm;
-                  font-size: 11px;
-                  transform-origin: top center;
+                  font-size: 14px;
                 }
+                
                 .invoice-paper {
                   width: 100%;
                   max-width: 100%;
                   break-inside: avoid;
                 }
-                .header-section { margin-bottom: 8px; }
-                .bill-section { margin-bottom: 8px; }
-                .product-section { margin-bottom: 8px; }
+                
+                .header-section { margin-bottom: 15px; }
+                .bill-section { margin-bottom: 15px; }
+                .product-section { margin-bottom: 15px; }
                 
                 /* All sections should avoid page breaks */
                 .header-section, .bill-section, .product-section, .total-section, .footer-section {
@@ -144,56 +199,93 @@ const InvoicePreview = () => {
                 }
                 
                 /* Reduce spacing */
-                .mb-6, .mb-8 { margin-bottom: 6px !important; }
-                .py-2 { padding-top: 4px !important; padding-bottom: 4px !important; }
-                .space-y-2 { margin-top: 4px !important; }
+                .mb-6, .mb-8 { margin-bottom: 10px !important; }
+                .py-2 { padding-top: 5px !important; padding-bottom: 5px !important; }
+                .space-y-2 { margin-top: 5px !important; }
+                
+                /* Fix header layout to prevent business name overlap */
+                .header-container {
+                  display: flex;
+                  flex-direction: row;
+                  justify-content: space-between;
+                  align-items: flex-start;
+                  width: 100%;
+                  margin-bottom: 15px;
+                }
+                
+                .header-left {
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 15px;
+                  width: 30%;
+                }
+                
+                .header-right {
+                  width: 65%;
+                  text-align: right;
+                }
+                
+                .invoice-title {
+                  margin-top: 0;
+                  margin-bottom: 6px;
+                  font-weight: bold;
+                  font-size: 22px;
+                  clear: both;
+                }
+                
+                .business-name {
+                  margin-top: 0;
+                  margin-bottom: 6px;
+                  font-weight: bold;
+                  font-size: 18px;
+                  line-height: 1.3;
+                  clear: both;
+                  word-wrap: break-word;
+                  max-width: 100%;
+                }
                 
                 /* Fix summary alignment */
                 .summary-row {
-                  margin-bottom: 4px;
+                  margin-bottom: 5px;
                   display: flex;
-                  justify-content: flex-end;
+                  justify-content: space-between;
+                  align-items: center;
+                  flex-wrap: nowrap;
+                  padding-right: 0;
                 }
                 
                 /* Ensure good visibility for summary values */
                 .summary-value {
                   font-weight: bold;
-                  min-width: 100px;
+                  min-width: 90px;
+                  max-width: 100px;
+                  text-align: right !important;
+                  white-space: nowrap;
                 }
                 
-                /* Headers and business name should be more visible */
-                h1, h2, h3, .business-name {
-                  font-weight: bold;
-                  margin: 2px 0;
-                }
-                
-                .business-name {
+                /* Product table needs good spacing - adjusted item columns width */
+                .product-table td, .product-table th {
+                  padding: 6px 5px;
                   font-size: 14px;
-                  margin-bottom: 4px;
+                }
+                
+                /* Fix total section alignment */
+                .total-section {
+                  margin-left: auto !important;
+                  margin-right: 0 !important;
+                  width: 250px !important;
+                  max-width: 250px !important;
+                  float: right !important;
+                  clear: both !important;
+                  padding-right: 0;
                 }
                 
                 /* Grand total needs to stand out */
                 .grand-total {
-                  font-size: 13px;
+                  font-size: 16px;
                   font-weight: bold;
-                }
-                
-                /* Product table needs good spacing */
-                .product-table td, .product-table th {
-                  padding: 4px 5px;
-                  font-size: 11px;
-                }
-                
-                /* Ensure table headers are bold and visible */
-                .product-table th {
-                  font-weight: bold;
-                  background-color: #f9fafb !important;
-                  color: #111827 !important;
-                }
-                
-                /* Make sure totals are right-aligned and visible */
-                .text-right, .summary-value, td:last-child {
                   text-align: right !important;
+                  white-space: nowrap;
                 }
               }
             </style>
@@ -286,21 +378,22 @@ const InvoicePreview = () => {
         ref={invoiceRef} 
         className="border rounded-lg p-4 sm:p-8 bg-white invoice-paper animate-fade-in overflow-x-auto"
       >
-        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start gap-4 header-section">
-          <div className="flex items-center gap-4">
+        <div className="header-container header-section">
+          <div className="header-left">
             {seller.logo && (
               <img 
                 src={seller.logo} 
                 alt="Seller Logo" 
-                className="h-12 w-12 sm:h-16 sm:w-16 object-contain"
+                className="h-10 w-10 sm:h-16 sm:w-16 object-contain"
+                style={{ marginRight: '8px' }}
               />
             )}
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-invoice-primary">INVOICE</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-invoice-primary invoice-title">INVOICE</h1>
               <p className="text-xs sm:text-sm text-gray-500"># {invoiceDetails.invoiceNumber}</p>
             </div>
           </div>
-          <div className="text-left sm:text-right w-full sm:w-auto">
+          <div className="header-right">
             <div className="mb-2">
               <p className="font-semibold text-base sm:text-lg business-name">{seller.businessName}</p>
               <p className="text-sm text-gray-600">{seller.address}</p>
@@ -389,7 +482,7 @@ const InvoicePreview = () => {
         
         <div className="flex justify-end mb-2">
           <div className="w-full sm:w-1/2 md:w-1/3 total-section">
-            <div className="space-y-1 text-right">
+            <div className="space-y-1">
               <div className="summary-row">
                 <span className="text-gray-600 summary-label">Subtotal:</span>
                 <span className="summary-value">{formatIndianCurrency(subTotal)}</span>
